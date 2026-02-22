@@ -4,12 +4,17 @@ Django settings for config project.
 
 from pathlib import Path
 import os
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-change-this-in-production'
-DEBUG = True
-ALLOWED_HOSTS = []
+
+# Set DEBUG to False in production
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+# Add your Vercel domain and local IPs
+ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost', '100.65.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,12 +62,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# --- DATABASE CONFIGURATION ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Use the Supabase Transaction Pooler (Port 6543) if the env var exists
+if os.environ.get('POSTGRES_URL'):
+    DATABASES['default'] = dj_database_url.config(
+        env='POSTGRES_URL',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    # REQUIRED for Supabase Transaction Pooler
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -75,8 +92,13 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
+# --- STATIC FILES ---
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise storage for Vercel
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

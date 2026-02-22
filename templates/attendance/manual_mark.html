@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual Entry | {{ entry.subject.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'mark_attendance' %}" class="text-decoration-none">Attendance</a></li>
+                    <li class="breadcrumb-item active">Manual Entry</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">{{ entry.subject.name }}</h2>
+            <p class="text-muted mb-0"><i class="bi bi-geo-alt"></i> {{ entry.classroom.name }} | {{ entry.timeslot.start_time }}</p>
+        </div>
+        <a href="{% url 'mark_attendance' %}?generate_for={{ entry.id }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Back to QR
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 p-4 pb-0">
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                <input type="text" id="studentSearch" class="form-control bg-light border-0" placeholder="Search by student name or roll number...">
+            </div>
+        </div>
+
+        <div class="list-group list-group-flush" id="studentList">
+            {% for student in students %}
+            <div class="list-group-item p-3 border-0 border-bottom student-item" data-name="{{ student.get_full_name|lower }} {{ student.username|lower }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 me-3">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ student.get_full_name|default:student.username }}</h6>
+                            <span class="small text-muted">ID: {{ student.username }}</span>
+                        </div>
+                    </div>
+
+                    <form method="POST" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            Mark Present
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-people display-1 text-light"></i>
+                <p class="text-muted">No students enrolled in this classroom.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Client-Side Search
+    document.getElementById('studentSearch').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase();
+        const items = document.querySelectorAll('.student-item');
+
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(query)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    .student-item { transition: background-color 0.2s ease; }
+    .student-item:hover { background-color: #f8f9fa; }
+    .input-group-text { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+    .form-control { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+</style>
+{% endblock %}

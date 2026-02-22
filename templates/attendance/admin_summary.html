@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Analytics | Smart Classroom{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h3 class="fw-bold mb-4">System Engagement Summary</h3>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h6 class="fw-bold text-muted mb-4">QR vs Manual Entry</h6>
+                <div style="height: 300px;">
+                    <canvas id="methodChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h6 class="fw-bold text-muted mb-4">Peak Scan Hours (Today)</h6>
+                <div style="height: 300px;">
+                    <canvas id="hourChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data passed from Django
+    const methodData = {
+        labels: [{% for item in method_stats %}"{{ item.entry_method|upper }}",{% endfor %}],
+        datasets: [{
+            data: [{% for item in method_stats %}{{ item.count }},{% endfor %}],
+            backgroundColor: ['#0d6efd', '#ffc107'],
+            hoverOffset: 4
+        }]
+    };
+
+    new Chart(document.getElementById('methodChart'), {
+        type: 'doughnut',
+        data: methodData,
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+</script>
+{% endblock %}

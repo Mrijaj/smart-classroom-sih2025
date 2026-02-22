@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login | Smart Classroom{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-flex bg-primary text-white p-5 flex-column justify-content-center">
+                    <i class="bi bi-shield-lock-fill display-2 mb-3"></i>
+                    <h2 class="fw-bold">Secure Access</h2>
+                    <p class="small opacity-75">Enter the Smart Curriculum & Attendance gateway for SIH 2025.</p>
+                </div>
+
+                <div class="col-md-7 p-5 bg-white">
+                    <h3 class="fw-bold mb-4">Login</h3>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Username</label>
+                            <div class="input-group border rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                                <input type="text" name="username" class="form-control border-0 py-2" placeholder="e.g. ijaj_admin" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">Password</label>
+                            <div class="input-group border rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-key"></i></span>
+                                <input type="password" name="password" class="form-control border-0 py-2" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
+                            Sign In
+                        </button>
+
+                        <div class="text-center mt-4 pt-2">
+                            <p class="small text-muted mb-0">Testing credentials:</p>
+                            <code class="d-block mt-1">ijaj_admin | student1</code>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Clean slate for the login page */
+    #sidebar, .navbar { display: none !important; }
+    main { width: 100% !important; margin-left: 0 !important; flex: 0 0 100% !important; max-width: 100% !important; background: #f0f2f5 !important; }
+</style>
+{% endblock %}

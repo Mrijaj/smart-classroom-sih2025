@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Weekly Timetable | Smart Classroom{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Weekly Timetable</h2>
+        <span class="badge bg-primary rounded-pill px-3 py-2">{{ request.user.userprofile.role|title }} View</span>
+    </div>
+
+    <div class="d-md-none mb-4 overflow-auto">
+        <div class="nav nav-pills flex-nowrap pb-2" id="day-tabs" role="tablist">
+            {% for day, entries in timetable_data.items %}
+            <button class="nav-link {% if forloop.first %}active{% endif %} me-2"
+                    data-bs-toggle="pill" data-bs-target="#tab-{{ day }}" type="button">
+                {{ day }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-content">
+        {% for day, entries in timetable_data.items %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ day }}">
+            <h5 class="fw-bold mb-3 d-none d-md-block">{{ day }}'s Schedule</h5>
+            <div class="row g-3">
+                {% for entry in entries %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 hover-shadow transition">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge badge-soft-primary px-3 py-2 rounded-pill">
+                                    {{ entry.timeslot.start_time|time:"H:i" }} - {{ entry.timeslot.end_time|time:"H:i" }}
+                                </span>
+                                <i class="bi bi-clock text-muted"></i>
+                            </div>
+                            <h5 class="fw-bold mb-1">{{ entry.subject.name }}</h5>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-geo-alt me-1"></i> Room: {{ entry.classroom.name }}
+                            </p>
+                            <hr class="opacity-10">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-2">
+                                    <i class="bi bi-person text-primary"></i>
+                                </div>
+                                <span class="small text-secondary">Prof. {{ entry.teacher.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

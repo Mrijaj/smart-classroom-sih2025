@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Smart Classroom{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4 g-3">
+        {% if role == 'student' %}
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-primary text-white text-center h-100">
+                <h6 class="small text-uppercase fw-bold opacity-75">Attendance Score</h6>
+                <h1 class="fw-bold mb-0">{{ attendance_percentage|default:"0" }}%</h1>
+                <p class="small mb-0 mt-2">Overall Presence</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h6 class="small text-uppercase fw-bold text-muted mb-3">Weekly Consistency</h6>
+                <div style="height: 120px;">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-dark text-white h-100">
+                <h6 class="small text-uppercase fw-bold opacity-75">Today's Date</h6>
+                <h2 class="fw-bold mb-0">{{ current_day }}, {{ today|date:"d M" }}</h2>
+                <a href="{% url 'mark_attendance' %}" class="btn btn-outline-light btn-sm mt-3 rounded-pill w-50">Manage Classes</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% if ongoing_class %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-primary border-5 mb-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary mb-2">Class in Progress</span>
+                            <h3 class="fw-bold mb-1">{{ ongoing_class.subject.name }}</h3>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-clock"></i> {{ ongoing_class.timeslot.start_time }} - {{ ongoing_class.timeslot.end_time }}
+                                | <i class="bi bi-geo-alt"></i> Room: {{ ongoing_class.classroom.name }}
+                            </p>
+                        </div>
+                        {% if role == 'teacher' %}
+                            <a href="{% url 'mark_attendance' %}?generate_for={{ ongoing_class.id }}" class="btn btn-primary rounded-pill px-4">Generate QR</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% elif is_free_period and role == 'student' %}
+                <div class="alert alert-info border-0 shadow-sm rounded-4 py-3 mb-4 d-flex align-items-center">
+                    <div class="fs-3 me-3"><i class="bi bi-stars"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Free Period Detected</h6>
+                        <p class="small mb-0">Based on your goal of <strong>{{ user.goal.target_career }}</strong>, we suggest these productive tasks:</p>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    {% for activity in suggested_activities %}
+                    <div class="col-12 col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-2 hover-shadow transition">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-light text-primary">{{ activity.get_category_display }}</span>
+                                    <span class="small text-muted"><i class="bi bi-stopwatch"></i> {{ activity.estimated_time }}m</span>
+                                </div>
+                                <h6 class="fw-bold mb-3">{{ activity.title }}</h6>
+                                <p class="small text-muted mb-4">{{ activity.description|truncatewords:15 }}</p>
+
+                                <button onclick="trackActivityStart('{{ activity.id }}', '{{ activity.external_link }}')"
+                                        class="btn btn-sm btn-primary w-100 rounded-pill py-2">
+                                    Start Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted small">Update your Student Goal in the admin panel to see personalized tasks.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition { transition: all 0.3s ease; }
+    .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
+    #attendanceChart { width: 100% !important; }
+</style>
+{% endblock %}

@@ -8,7 +8,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-change-this-in-production'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 # Set DEBUG to False in production
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # REQUIRED for Vercel static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,7 +77,7 @@ if os.environ.get('POSTGRES_URL'):
         conn_max_age=600,
         conn_health_checks=True,
     )
-    # REQUIRED for Supabase Transaction Pooler
+    # REQUIRED for Supabase Transaction Pooler to work with Django
     DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -94,10 +94,10 @@ USE_TZ = True
 
 # --- STATIC FILES ---
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Vercel will look for this folder
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# WhiteNoise storage for Vercel
+# WhiteNoise storage optimized for Vercel (Compression and Caching)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
